@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block content %}
+<div id="bookings" class="grid gap-0 row-gap-3"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    function fetchBookings() {
+        const today = new Date();
+        const dateString = today.toISOString().split('T')[0]; // Converts date to YYYY-MM-DD format
+        
+        console.log(dateString)
+
+        fetch(`/get-bookings?date=${dateString}`) // Fetches bookings for the current day
+            .then(response => response.json())
+            .then(data => updateBookingsDisplay(data))
+            .catch(error => console.error('Error fetching bookings:', error));
+    }
+
+    function updateBookingsDisplay(bookings) {
+        const container = document.getElementById('bookings');
+        container.innerHTML = '';
+        const now = new Date();
+
+        bookings.forEach(booking => {
+            const bookingStart = new Date(booking.start);
+            const bookingEnd = new Date(booking.end);
+
+            if (bookingEnd > now) { // Only display if the booking hasn't ended
+                const card = document.createElement('div');
+                card.className = 'card mx-auto p-2 mb-3 shadow';
+                card.style.width = '18rem';
+
+                if (now >= bookingStart && now <= bookingEnd) {
+                    card.classList.add("bg-primary-subtle"); // Highlight current booking
+                    booking.eta = 'Now';
+                } else {
+                    const minutesToStart = Math.round((bookingStart - now) / 60000);
+                    booking.eta = minutesToStart > 0 ? `${minutesToStart} minutes` : 'Starting soon';
+                }
+
+                const cardBody = document.createElement('div');
+                cardBody.className = 'card-body';
+
+                const nameElement = document.createElement('h5');
+                nameElement.className = 'card-title';
+                nameElement.textContent = booking.name;
+
+                const descriptionElement = document.createElement('p');
+                descriptionElement.className = 'card-text';
+                descriptionElement.textContent = booking.description;
+
+                const etaElement = document.createElement('p');
+                etaElement.textContent = `ETA: ${booking.eta}`;
+
+                cardBody.appendChild(nameElement);
+                cardBody.appendChild(descriptionElement);
+                cardBody.appendChild(etaElement);
+                card.appendChild(cardBody);
+                container.appendChild(card);
+            }
+        });
+    }
+
+    fetchBookings(); // Initial fetch
+    setInterval(fetchBookings, 60000); // Update every minute
+}); 
+</script>
+{% endblock %}

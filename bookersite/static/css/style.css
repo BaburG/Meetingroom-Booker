@@ -1,0 +1,32 @@
+.splitview2container {
+  display: flex;
+}
+
+.splitview2left {
+  flex: 1;
+}
+
+.splitview2right {
+  flex: 1;
+}
+
+.splitview3container {
+  display: flex;
+}
+
+.splitview3left {
+  text-align: center;
+  flex: 1;
+}
+
+.splitview3middle {
+  text-align: center;
+  flex: 1;
+}
+
+.splitview3right {
+  text-align: center;
+  flex: 1;
+}
+
+
