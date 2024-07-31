@@ -1,13 +1,10 @@
-{% extends 'base.html' %}
-{% load static %}
-{% block content %}
+{% extends 'base.html' %} {% load static %} {% block content %}
 
 <div class="splitview2container">
     <div class="splitview2left mx-auto p-2 bg-dark-subtle form-group">
         <h1 class="mx-auto p-2">Create Booking</h1>
         <form method="post">
-            {% csrf_token %}
-            {{ form.as_p }}
+            {% csrf_token %} {{ form.as_p }}
             <button type="submit">Save</button>
         </form>
     </div>
@@ -17,70 +14,76 @@
     </div>
 </div>
 
-{% endblock %}
-
-
-{% block extra_js %}
+{% endblock %} {% block extra_js %}
 <script>
-    document.addEventListener('DOMContentLoaded', (event) => {
-        console.log('DOM fully loaded and parsed');
-        const dateInput = document.getElementById('id_date');
+    document.addEventListener("DOMContentLoaded", (event) => {
+        console.log("DOM fully loaded and parsed");
+        const dateInput = document.getElementById("id_date");
         if (dateInput) {
-            console.log('Date input found:', dateInput);
-            dateInput.addEventListener('change', function() {
+            console.log("Date input found:", dateInput);
+            dateInput.addEventListener("change", function () {
                 const date = this.value;
                 if (date) {
-                    console.log('Date changed to:', date);
+                    console.log("Date changed to:", date);
                     fetchBookings(date);
                 }
             });
         } else {
-            console.error('Date input not found');
+            console.error("Date input not found");
         }
     });
 
     function fetchBookings(date) {
-        console.log('Fetching bookings for date:', date);
+        console.log("Fetching bookings for date:", date);
         fetch(`/get-bookings?date=${date}`)
-            .then(response => {
-                console.log('Response received:', response);
+            .then((response) => {
+                console.log("Response received:", response);
                 return response.json();
             })
-            .then(data => {
-                console.log('Data received:', data);
+            .then((data) => {
+                console.log("Data received:", data);
                 displayBookings(data);
             })
-            .catch(error => console.error('Error fetching bookings:', error));
+            .catch((error) => console.error("Error fetching bookings:", error));
     }
 
     function displayBookings(bookings) {
-        const bookingsDiv = document.getElementById('bookings');
-        bookingsDiv.innerHTML = '';
+        const bookingsDiv = document.getElementById("bookings");
+        bookingsDiv.innerHTML = "";
 
         if (bookings.length === 0) {
-            bookingsDiv.textContent = 'No bookings for this date.';
+            bookingsDiv.textContent = "No bookings for this date.";
         } else {
-            bookings.forEach(booking => {
-                const card = document.createElement('div');
-                card.className = 'card mx-auto p-2 mb-2 shadow';
-                card.style.width = '18rem';
+            bookings.forEach((booking) => {
+                const card = document.createElement("div");
+                card.className = "card mx-auto p-2 mb-2 shadow";
+                card.style.width = "18rem";
 
-                const cardBody = document.createElement('div');
-                cardBody.className = 'card-body';
+                const cardBody = document.createElement("div");
+                cardBody.className = "card-body";
 
-                const cardTitle = document.createElement('h5');
-                cardTitle.className = 'card-title';
+                const cardTitle = document.createElement("h5");
+                cardTitle.className = "card-title";
                 cardTitle.textContent = booking.name;
 
-                const cardSubtitle = document.createElement('h6');
-                cardSubtitle.className = 'card-subtitle mb-2 text-body-secondary';
+                const cardSubtitle = document.createElement("h6");
+                cardSubtitle.className =
+                    "card-subtitle mb-2 text-body-secondary";
                 cardSubtitle.textContent = booking.description;
 
-                const startTime = new Date(booking.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                const endTime = new Date(booking.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                const cardText = document.createElement('p');
-                cardText.className = 'card-text';
-                cardText.textContent = `${new Date(booking.start).toLocaleDateString()} - ${startTime} to ${endTime}`;
+                const startTime = new Date(booking.start).toLocaleTimeString(
+                    [],
+                    { hour: "2-digit", minute: "2-digit" }
+                );
+                const endTime = new Date(booking.end).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                });
+                const cardText = document.createElement("p");
+                cardText.className = "card-text";
+                cardText.textContent = `${new Date(
+                    booking.start
+                ).toLocaleDateString()} - ${startTime} to ${endTime}`;
 
                 cardBody.appendChild(cardTitle);
                 cardBody.appendChild(cardSubtitle);

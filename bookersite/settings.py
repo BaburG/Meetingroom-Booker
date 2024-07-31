@@ -77,9 +77,9 @@ WSGI_APPLICATION = 'bookersite.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'BookerMeetings',
+        'NAME': 'bookermeetings',
         'USER': 'postgres',
-        'PASSWORD': 'password',
+        'PASSWORD': 'mysecretpassword',
         'HOST': 'localhost',
         'PORT': '5432',
     }

@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.template import loader
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 from datetime import datetime, timedelta
 from django.utils import timezone
 
@@ -92,3 +92,7 @@ def get_bookings(request):
 
 def live_view(request):
     return render(request, "booker/live_view.html")
+
+def view_booking(request, pk):
+    booking = get_object_or_404(Booking, id=pk)
+    return render(request,"booker/view_booking.html", {'booking':booking})
