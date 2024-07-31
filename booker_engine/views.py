@@ -2,7 +2,8 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.template import loader
 from django.shortcuts import redirect
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
+from django.utils import timezone
 
 from .models import Booking
 from .forms import BookingForm
@@ -79,10 +80,10 @@ def get_bookings(request):
     date = datetime.strptime(fetched_date, "%Y-%m-%d")
     
     # Start of the day (midnight)
-    start_of_day = datetime.combine(date, datetime.min.time())
+    start_of_day = timezone.make_aware(datetime.combine(date, datetime.min.time()))
     
     # End of the day (last second of the day)
-    end_of_day = datetime.combine(date + timedelta(days=1), datetime.min.time()) - timedelta(seconds=1)
+    end_of_day = timezone.make_aware(datetime.combine(date + timedelta(days=1), datetime.min.time()) - timedelta(seconds=1))
     if date:
         bookings = Booking.objects.filter(start__gt=start_of_day, start__lt=end_of_day).order_by("start")
         bookings_list = list(bookings.values('name', 'description', 'start', 'end'))
