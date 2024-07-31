@@ -7,22 +7,29 @@ from datetime import datetime, timedelta, timezone
 from .models import Booking
 from .forms import BookingForm
 
+def last_midnight():
+    return datetime.combine(datetime.now().date(), datetime.min.time())
+
+def today_midnight():
+    return last_midnight() + timedelta(days=1)
+
+def tomorrow_midnight():
+    return today_midnight() + timedelta(days=1)
+
+def after_tomorrow_midnight():
+    return today_midnight() + timedelta(days=2)
+
+
 
 def index(request):
-    now = datetime.now()
-    last_midnight = datetime.combine(now.date(), datetime.min.time())
-    today_midnight = last_midnight + timedelta(days=1)
-    tomorrow_midnight = today_midnight + timedelta(days=1)
-    after_tomorrow_midnight = today_midnight + timedelta(days=2)
-
     today_list = Booking.objects.filter(
-        start__gte=last_midnight, start__lt=today_midnight
+        start__gte=last_midnight(), start__lt=today_midnight()
     ).order_by("start")
     tomorrow_list = Booking.objects.filter(
-        start__gte=today_midnight, start__lt=tomorrow_midnight
+        start__gte=today_midnight(), start__lt=tomorrow_midnight()
     ).order_by("start")
     after_tomorrow_list = Booking.objects.filter(
-        start__gte=tomorrow_midnight, start__lt=after_tomorrow_midnight
+        start__gte=tomorrow_midnight(), start__lt=after_tomorrow_midnight()
     ).order_by("start")
 
     template = loader.get_template("booker/index.html")
