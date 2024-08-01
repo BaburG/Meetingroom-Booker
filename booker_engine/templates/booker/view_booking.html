@@ -1,8 +1,15 @@
 {% extends 'base.html' %} {% block content %}
 
-<h1>{{booking.name}}</h1>
-<h2>{{booking.description}}</h2>
-<h3>{{booking.start}}</h3>
-<h4>{{booking.end}}</h4>
+<div class="mx-auto p-2">
+    <div class="card " style="width: 18rem;">
+        <div class="card-body">
+          <h5 class="card-title">{{booking.name}}</h5>
+          <h6 class="card-subtitle mb-2 text-muted">{{booking.description}}</h6>
+          <p class="card-text">Start:{{booking.start}} <br>End:{{booking.end}}</p>
+          <a href="{% url 'edit_booking' booking.id %}" class="card-link">Edit Booking</a>
+          <a href="#" class="card-link">Delete Booking</a>
+        </div>
+      </div>
+</div>
 
 {% endblock %}

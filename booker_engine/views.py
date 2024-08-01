@@ -34,6 +34,7 @@ def index(request):
     ).order_by("start")
 
     template = loader.get_template("booker/index.html")
+    #print(today_list[0].start)
     context = {
         "today_list": today_list,
         "tomorrow_list": tomorrow_list,
@@ -93,6 +94,29 @@ def get_bookings(request):
 def live_view(request):
     return render(request, "booker/live_view.html")
 
-def view_booking(request, pk):
-    booking = get_object_or_404(Booking, id=pk)
+def view_booking(request, id):
+    booking = get_object_or_404(Booking, id=id)
     return render(request,"booker/view_booking.html", {'booking':booking})
+
+def edit_booking(request, id):
+    booking = get_object_or_404(Booking, id=id)
+    if request.method == 'POST':
+        form = BookingForm(request.POST, instance=booking)
+        if form.is_valid():
+            form.save()
+            return redirect("index")
+    else:
+        date = booking.start.date()
+        time = booking.start.astimezone(timezone.get_current_timezone()).time()
+        duration = booking.end - booking.start
+        duration_in_min = int(duration.total_seconds() / 60)
+
+        form = BookingForm(initial={
+            'name': booking.name,
+            'description': booking.description,
+            'date': date,
+            'time': time,
+            'duration': duration_in_min,
+        })
+
+    return render(request, "booker/edit.html", {'id': booking.id, 'form': form, 'booking': booking})
