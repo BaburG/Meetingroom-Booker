@@ -24,13 +24,13 @@ def after_tomorrow_midnight():
 
 def index(request):
     today_list = Booking.objects.filter(
-        start__gte=last_midnight(), start__lt=today_midnight()
+        start__gte=last_midnight(), start__lt=today_midnight(), active=True
     ).order_by("start")
     tomorrow_list = Booking.objects.filter(
-        start__gte=today_midnight(), start__lt=tomorrow_midnight()
+        start__gte=today_midnight(), start__lt=tomorrow_midnight(), active=True
     ).order_by("start")
     after_tomorrow_list = Booking.objects.filter(
-        start__gte=tomorrow_midnight(), start__lt=after_tomorrow_midnight()
+        start__gte=tomorrow_midnight(), start__lt=after_tomorrow_midnight(), active=True
     ).order_by("start")
 
     template = loader.get_template("booker/index.html")
@@ -86,7 +86,7 @@ def get_bookings(request):
     # End of the day (last second of the day)
     end_of_day = timezone.make_aware(datetime.combine(date + timedelta(days=1), datetime.min.time()) - timedelta(seconds=1))
     if date:
-        bookings = Booking.objects.filter(start__gt=start_of_day, start__lt=end_of_day).order_by("start")
+        bookings = Booking.objects.filter(start__gt=start_of_day, start__lt=end_of_day, active=True).order_by("start")
         bookings_list = list(bookings.values('name', 'description', 'start', 'end'))
         return JsonResponse(bookings_list, safe=False)
     return JsonResponse([], safe=False)
@@ -105,7 +105,7 @@ def edit_booking(request, id):
         if form.is_valid():
             form.save()
             return redirect("index")
-    else:
+    elif request.method == 'GET':
         date = booking.start.date()
         time = booking.start.astimezone(timezone.get_current_timezone()).time()
         duration = booking.end - booking.start
@@ -118,5 +118,15 @@ def edit_booking(request, id):
             'time': time,
             'duration': duration_in_min,
         })
+        return render(request, "booker/edit.html", {'id': booking.id, 'form': form, 'booking': booking})
 
-    return render(request, "booker/edit.html", {'id': booking.id, 'form': form, 'booking': booking})
+
+
+def delete_booking(request, id):
+    booking = get_object_or_404(Booking, id=id)
+    if request.method == 'POST':
+        booking.active = False
+        booking.save()  # Save the changes to the database
+        print(f"Booking {id} marked as inactive")
+        return redirect("index")
+    return redirect("index")

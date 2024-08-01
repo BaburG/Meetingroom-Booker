@@ -9,6 +9,7 @@
                 <button type="submit" class="btn btn-primary">
                     Save Edits
                 </button>
+            </form>
                 <!-- Delete button trigger modal -->
 
                 <button
@@ -50,14 +51,17 @@
                                 >
                                     Cancel
                                 </button>
-                                <button type="button" class="btn btn-danger">
-                                    Delete
-                                </button>
+                                <form method="post" action="{% url 'delete_booking' id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger">
+                                        Delete
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </div>
                 </div>
-            </form>
+            
         </div>
         <div class="col-sm mx-auto rounded p-8 bg-body-secondary">
             <h1 class="mx-auto p-2">Other bookings on that day</h1>
@@ -145,6 +149,10 @@
                 bookingsDiv.appendChild(card);
             });
         }
+    }
+
+    function click(){
+        console.log("button clicked");
     }
 </script>
 {% endblock %}
