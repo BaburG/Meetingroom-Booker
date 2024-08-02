@@ -1,4 +1,8 @@
 from django import forms
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
+from django.utils import timezone
+
 from datetime import datetime, timedelta
 from .models import Booking
 
@@ -23,12 +27,14 @@ class BookingForm(forms.ModelForm):
         duration = int(cleaned_data.get("duration"))
 
         if date and time and duration:
-            start_datetime = datetime.combine(date, time)
+            
+            start_datetime = datetime.combine(date, time, timezone.get_current_timezone())
             end_datetime = start_datetime + timedelta(minutes=duration)
+            
 
             # Check for overlapping bookings
             overlapping_bookings = Booking.objects.filter(
-                start__lt=end_datetime, end__gt=start_datetime
+                start__lt=end_datetime, end__gt=start_datetime, active=True
             ).exclude(id=self.instance.id)  # Exclude the current instance from the check
             if overlapping_bookings.exists():
                 raise forms.ValidationError(
@@ -48,3 +54,26 @@ class BookingForm(forms.ModelForm):
         if commit:
             instance.save()
         return instance
+    
+class SignUpForm(UserCreationForm):
+    email = forms.EmailField(max_length=200, help_text='Required')
+
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'password1', 'password2')
+    
+    def __init__(self, *args, **kwargs):
+        super(SignUpForm, self).__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            field.widget.attrs['class'] = 'form-control'
+
+class LoginForm(forms.Form):
+    username = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'User Name'}))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password'}))
+    keep_signed_in = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
+
+
+class DateForm(forms.Form):
+    date = forms.DateField(input_formats=['%Y-%m-%d'], error_messages={
+        'invalid': 'Enter a valid date in YYYY-MM-DD format.'
+    })

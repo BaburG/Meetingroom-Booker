@@ -13,6 +13,7 @@
             initialView: "dayGridMonth",
             timeZone: "local",
             events: function (fetchInfo, successCallback, failureCallback) {
+                console.log(calendar);
                 console.log("Fetching events...");
                 fetch("/all_bookings")
                     .then((response) => {

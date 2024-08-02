@@ -126,7 +126,12 @@
                 const cardSubtitle = document.createElement("h6");
                 cardSubtitle.className =
                     "card-subtitle mb-2 text-body-secondary";
-                cardSubtitle.textContent = booking.description;
+                cardSubtitle.textContent = booking.username;
+                
+                const cardDescription = document.createElement("p");
+                cardDescription.className =
+                    "card-text";
+                cardDescription.textContent = booking.description;
 
                 const startTime = new Date(booking.start).toLocaleTimeString(
                     [],
