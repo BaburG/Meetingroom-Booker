@@ -77,3 +77,35 @@ class DateForm(forms.Form):
     date = forms.DateField(input_formats=['%Y-%m-%d'], error_messages={
         'invalid': 'Enter a valid date in YYYY-MM-DD format.'
     })
+
+
+class BookingAPIForm(forms.ModelForm):
+    start = forms.DateTimeField()
+    end = forms.DateTimeField()
+
+    class Meta:
+        model = Booking
+        fields = ['name', 'description', 'start', 'end']
+
+    def __init__(self, *args, **kwargs):
+        super(BookingAPIForm, self).__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            field.widget.attrs['class'] = 'form-control'
+
+    def clean(self):
+        cleaned_data = super().clean()
+        start = cleaned_data.get("start")
+        end = cleaned_data.get("end")
+
+        if start and end:
+
+            # Check for overlapping bookings
+            overlapping_bookings = Booking.objects.filter(
+                start__lt=end, end__gt=start, active=True
+            ).exclude(id=self.instance.id)  # Exclude the current instance from the check
+            if overlapping_bookings.exists():
+                raise forms.ValidationError(
+                    "This booking overlaps with an existing booking."
+                )
+
+        return cleaned_data

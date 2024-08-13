@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-eadg+_)!(g5n#fjg$fzdc^&dai(-js20+238n0*k*mb61f@+2^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["192.168.1.82","localhost","127.0.0.1"]
+ALLOWED_HOSTS = ["192.168.1.40","localhost","127.0.0.1"]
 
 
 
@@ -43,6 +43,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
+    'rest_framework',
+    'rest_framework.authtoken',
 ]
 
 MIDDLEWARE = [
@@ -53,7 +56,22 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = 'bookersite.urls'
 
@@ -82,10 +100,10 @@ WSGI_APPLICATION = 'bookersite.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'postgres',
+        'NAME': 'bookermeetings',
         'USER': 'postgres',
-        'PASSWORD': 'postgres',
-        'HOST': 'db',
+        'PASSWORD': 'mysecretpassword',
+        'HOST': 'localhost',
         'PORT': '5432',
     }
 }
