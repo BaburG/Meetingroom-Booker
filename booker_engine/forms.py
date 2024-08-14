@@ -24,7 +24,10 @@ class BookingForm(forms.ModelForm):
         cleaned_data = super().clean()
         date = cleaned_data.get("date")
         time = cleaned_data.get("time")
-        duration = int(cleaned_data.get("duration"))
+        duration = cleaned_data.get("duration")
+
+        if duration is None or duration < 15:
+            raise forms.ValidationError("Ensure this value is greater than or equal to 15.")
 
         if date and time and duration:
             
