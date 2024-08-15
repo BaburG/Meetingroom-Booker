@@ -28,6 +28,8 @@ class BookingForm(forms.ModelForm):
 
         if duration is None or duration < 15:
             raise forms.ValidationError("Ensure this value is greater than or equal to 15.")
+        if duration > 3600:
+         raise forms.ValidationError("Ensure this value is less than 3600.")
 
         if date and time and duration:
             
@@ -101,6 +103,17 @@ class BookingAPIForm(forms.ModelForm):
         end = cleaned_data.get("end")
 
         if start and end:
+            # Ensure the end time is at least 15 minutes after the start time
+            if end < start + timedelta(minutes=15):
+                raise forms.ValidationError(
+                    "The duration must be atleast 15 minutes"
+                )
+            
+            if end > start + timedelta(hours=6):
+                raise forms.ValidationError(
+                    "The duration must be less than 6 hours"
+                )
+
 
             # Check for overlapping bookings
             overlapping_bookings = Booking.objects.filter(

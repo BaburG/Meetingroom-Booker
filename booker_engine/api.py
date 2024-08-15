@@ -84,7 +84,7 @@ def get_week(request):
         return Response({"error": "No Date input"}, status=400)
     start_of_day = timezone.make_aware(datetime.combine(fetched_date, datetime.min.time()))
     end_of_day = timezone.make_aware(datetime.combine(fetched_date + timedelta(days=1), datetime.min.time()) - timedelta(seconds=1))
-    weekBookings = list(Booking.objects.filter(active=True, start__gt=start_of_day, start__lt=(end_of_day + timedelta(days=7)))
+    weekBookings = list(Booking.objects.filter(active=True, start__gt=start_of_day, start__lt=(end_of_day + timedelta(days=8)))
                .select_related('userid')
                .order_by("start")
                .values('id','name', 'description', 'start', 'end', username=F('userid__username')))
@@ -116,8 +116,15 @@ def create_booking(request):
     data = request.data.copy()
     data['userid'] = user.id
 
-    data['start'] = datetime.fromisoformat(data['start']).replace(tzinfo=timezone.get_current_timezone())
-    data['end'] = datetime.fromisoformat(data['end']).replace(tzinfo=timezone.get_current_timezone())
+    # Convert start and end times to timezone-aware datetime objects if they exist
+    try:
+        if 'start' in data:
+            data['start'] = datetime.fromisoformat(data['start']).replace(tzinfo=timezone.get_current_timezone())
+        if 'end' in data:
+            data['end'] = datetime.fromisoformat(data['end']).replace(tzinfo=timezone.get_current_timezone())
+    except (ValueError, TypeError) as e:
+        return Response({"error": "Invalid date format"}, status=status.HTTP_400_BAD_REQUEST)
+
     
     # Validate the form
     form = BookingAPIForm(data=data)
@@ -230,9 +237,14 @@ def update_booking(request):
     # Add the user ID to the request data
     data = request.data.copy()
     data['userid'] = user.id
-
-    data['start'] = datetime.fromisoformat(data['start']).replace(tzinfo=timezone.get_current_timezone())
-    data['end'] = datetime.fromisoformat(data['end']).replace(tzinfo=timezone.get_current_timezone())
+    # Convert start and end times to timezone-aware datetime objects if they exist
+    try:
+        if 'start' in data:
+            data['start'] = datetime.fromisoformat(data['start']).replace(tzinfo=timezone.get_current_timezone())
+        if 'end' in data:
+            data['end'] = datetime.fromisoformat(data['end']).replace(tzinfo=timezone.get_current_timezone())
+    except (ValueError, TypeError) as e:
+        return Response({"error": "Invalid date format"}, status=status.HTTP_400_BAD_REQUEST)
     
     # Validate the form with existing instance
     form = BookingAPIForm(data=data, instance=booking)

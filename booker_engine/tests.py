@@ -85,6 +85,7 @@ class BookingTestCase(TestCase):
         self.assertTrue(form.errors)
         self.assertIn('duration', form.errors)
         self.assertEqual(form.errors['duration'], ['Ensure this value is greater than or equal to 15.'])
+        
 
     def test_4_edit_booking(self):
         url = reverse('edit_booking', args=[self.booking.id])
@@ -126,6 +127,91 @@ class BookingTestCase(TestCase):
         url = reverse('live_view')
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
+
+    def test_10_create_booking_no_duration(self):
+        url = reverse('create_booking')
+        data = {
+            'name': 'Short Booking',
+            'description': 'Short Description',
+            'date': (timezone.now() + timedelta(days=1)).date(),
+            'time': (timezone.now() + timedelta(days=1, hours=1)).time(),
+        }
+        response = self.client.post(url, data)
+          # Check that the response status code is 200 OK
+        self.assertEqual(response.status_code, 200)
+
+        # Check that the form is returned in the context
+        self.assertIn('form', response.context)
+
+        # Check for the specific form error
+        form = response.context['form']
+        self.assertTrue(form.errors)
+        self.assertIn('duration', form.errors)
+        self.assertEqual(form.errors['duration'], ['This field is required.'])
+
+    def test_11_create_booking_no_name(self):
+        url = reverse('create_booking')
+        data = {
+            'description': 'Short Description',
+            'date': (timezone.now() + timedelta(days=1)).date(),
+            'time': (timezone.now() + timedelta(days=1, hours=1)).time(),
+            'duration': 10
+        }
+        response = self.client.post(url, data)
+          # Check that the response status code is 200 OK
+        self.assertEqual(response.status_code, 200)
+
+        # Check that the form is returned in the context
+        self.assertIn('form', response.context)
+
+        # Check for the specific form error
+        form = response.context['form']
+        self.assertTrue(form.errors)
+        self.assertIn('duration', form.errors)
+        self.assertEqual(form.errors['name'], ['This field is required.'])
+
+
+    def test_12_create_booking_no_date(self):
+        url = reverse('create_booking')
+        data = {
+            'name': 'Short Booking',
+            'description': 'Short Description',
+            'time': (timezone.now() + timedelta(days=1, hours=1)).time(),
+            'duration': 10
+        }
+        response = self.client.post(url, data)
+          # Check that the response status code is 200 OK
+        self.assertEqual(response.status_code, 200)
+
+        # Check that the form is returned in the context
+        self.assertIn('form', response.context)
+
+        # Check for the specific form error
+        form = response.context['form']
+        self.assertTrue(form.errors)
+        self.assertIn('duration', form.errors)
+        self.assertEqual(form.errors['date'], ['This field is required.'])
+
+    def test_13_create_booking_no_time(self):
+        url = reverse('create_booking')
+        data = {
+            'name': 'Short Booking',
+            'description': 'Short Description',
+            'date': (timezone.now() + timedelta(days=1)).date(),
+            'duration': 10
+        }
+        response = self.client.post(url, data)
+          # Check that the response status code is 200 OK
+        self.assertEqual(response.status_code, 200)
+
+        # Check that the form is returned in the context
+        self.assertIn('form', response.context)
+
+        # Check for the specific form error
+        form = response.context['form']
+        self.assertTrue(form.errors)
+        self.assertIn('duration', form.errors)
+        self.assertEqual(form.errors['time'], ['This field is required.'])
 
 
 class BookingAPITestCase(APITestCase):
@@ -217,3 +303,56 @@ class BookingAPITestCase(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.booking.refresh_from_db()
         self.assertFalse(self.booking.active)
+
+    def test_7_create_booking_short_duration(self):
+        url = reverse('api_create_booking')
+        data = {
+            'name': 'API Booking',
+            'description': 'API Description',
+            'start': (timezone.now() + timedelta(days=1)).isoformat(),
+            'end': (timezone.now() + timedelta(days=1, minutes=10)).isoformat(),
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 400)
+
+    def test_8_create_booking_no_end(self):
+        url = reverse('api_create_booking')
+        data = {
+            'name': 'API Booking',
+            'description': 'API Description',
+            'start': (timezone.now() + timedelta(days=1)).isoformat(),
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 400)
+
+    def test_9_create_booking_no_start(self):
+        url = reverse('api_create_booking')
+        data = {
+            'name': 'API Booking',
+            'description': 'API Description',
+            'end': (timezone.now() + timedelta(days=1, hours=1)).isoformat(),
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 400)
+
+    def test_10_create_booking_no_name(self):
+        url = reverse('api_create_booking')
+        data = {
+            'description': 'API Description',
+            'start': (timezone.now() + timedelta(days=1)).isoformat(),
+            'end': (timezone.now() + timedelta(days=1, hours=1)).isoformat(),
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 400)
+
+    def test_11_create_booking_zero_duration(self):
+        url = reverse('api_create_booking')
+        data = {
+            'name': 'API Booking',
+            'description': 'API Description',
+            'start': (timezone.now() + timedelta(days=1)).isoformat(),
+            'end': (timezone.now() + timedelta(days=1)).isoformat(),
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(Booking.objects.filter(name='API Booking').exists())
