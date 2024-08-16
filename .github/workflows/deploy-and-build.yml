@@ -19,7 +19,7 @@ jobs:
       - name: Copy repository to the root directory on VM
         run: |
           scp -r -i ${{ secrets.SSH_KEY }} ./* ${{ secrets.VM_USER }}@${{ secrets.VM_IP }}:~/
-          ssh -i ${{ secrets.SSH_KEY }} ${{ secrets.VM_USER }}@${{ secrets.VM_IP }} "sudo cp -r ~/ /"
+          ssh -i ${{ secrets.SSH_KEY }} ${{ secrets.VM_USER }}@${{ secrets.VM_IP }} "sudo cp -r ~/"
 
       - name: Deploy with Docker Compose
         run: |
