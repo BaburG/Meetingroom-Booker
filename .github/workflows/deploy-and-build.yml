@@ -1,0 +1,44 @@
+name: Deploy to VM
+
+on:
+  push:
+    branches:
+      - main  # Triggers the action on commits to the main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install SSH client
+        run: sudo apt-get install openssh-client -y
+
+      - name: Set up SSH key
+        run: |
+          echo "${{ secrets.SSH_KEY }}" > ssh_key
+          chmod 600 ssh_key
+
+      - name: Create SSH directory and add VM to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+
+      - name: Create bookerwebapp directory and copy repository to VM
+        run: |
+          ssh -i ssh_key ${{ secrets.VM_USER }}@${{ secrets.VM_IP }} "mkdir -p ~/bookerwebapp"
+          scp -r -i ssh_key ./* ${{ secrets.VM_USER }}@${{ secrets.VM_IP }}:~/bookerwebapp/
+
+      - name: Deploy with Docker Compose
+        run: |
+          ssh -i ssh_key ${{ secrets.VM_USER }}@${{ secrets.VM_IP }} << EOF
+            cd ~/bookerwebapp
+            sudo docker compose down
+            sudo docker compose build
+            sudo docker compose up -d
+          EOF
+
+      - name: Clean up SSH key
+        run: rm ssh_key
