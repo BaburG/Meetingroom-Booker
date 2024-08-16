@@ -21,8 +21,9 @@ jobs:
           echo "${{ secrets.SSH_KEY }}" > ssh_key
           chmod 600 ssh_key
 
-      - name: Add VM to known hosts
+      - name: Create SSH directory and add VM to known hosts
         run: |
+          mkdir -p ~/.ssh
           echo "${{ secrets.KNOWN_HOSTS }}" > ~/.ssh/known_hosts
 
       - name: Copy repository to the root directory on VM
