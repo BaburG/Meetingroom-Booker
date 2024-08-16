@@ -16,10 +16,14 @@ jobs:
       - name: Install SSH client
         run: sudo apt-get install openssh-client -y
 
-      - name: Set up RSA SSH key
+      - name: Set up SSH key
         run: |
           echo "${{ secrets.SSH_KEY }}" > ssh_key
           chmod 600 ssh_key
+
+      - name: Add VM to known hosts
+        run: |
+          echo "${{ secrets.KNOWN_HOSTS }}" > ~/.ssh/known_hosts
 
       - name: Copy repository to the root directory on VM
         run: |
