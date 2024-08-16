@@ -26,15 +26,15 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.KNOWN_HOSTS }}" > ~/.ssh/known_hosts
 
-      - name: Copy repository to the root directory on VM
+      - name: Create bookerwebapp directory and copy repository to VM
         run: |
-          scp -r -i ssh_key ./* ${{ secrets.VM_USER }}@${{ secrets.VM_IP }}:~/
-          ssh -i ssh_key ${{ secrets.VM_USER }}@${{ secrets.VM_IP }} "sudo cp -r ~/ /bookerwebapp/"
+          ssh -i ssh_key ${{ secrets.VM_USER }}@${{ secrets.VM_IP }} "mkdir -p /bookerwebapp"
+          scp -r -i ssh_key ./* ${{ secrets.VM_USER }}@${{ secrets.VM_IP }}:/bookerwebapp/
 
       - name: Deploy with Docker Compose
         run: |
           ssh -i ssh_key ${{ secrets.VM_USER }}@${{ secrets.VM_IP }} << EOF
-            cd /
+            cd /bookerwebapp
             sudo docker compose down
             sudo docker compose build
             sudo docker compose up -d
