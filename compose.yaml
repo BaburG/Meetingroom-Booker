@@ -1,15 +1,15 @@
-version: '3.8'  # Specify the version
+
 
 services:
   webserver:
     build:
       context: .
     ports:
-      - 80:8000
-    command: >
-      sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+      - 8000:8000
+    command: gunicorn bookersite.wsgi:application --bind 0.0.0.0:8000
     volumes:
       - .:/code
+      - static:/app/static
     depends_on:
       - db
     environment:
@@ -18,6 +18,15 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_HOST=db
       - DB_PORT=5432
+  
+  nginx:
+    build: ./nginx
+    volumes: 
+      - static:/static
+    ports:
+      - 80:80
+    depends_on:
+      - webserver
 
   db:
     image: postgres:latest
@@ -31,5 +40,6 @@ services:
 
 volumes:
   postgres_data:
+  static:
 
 
